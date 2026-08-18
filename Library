@@ -1,6 +1,5 @@
 --[[
-	Vaehz UI Library
-	Pro of AI
+	Vaehz UI Library + Full Example
 ]]
 
 local TweenService = game:GetService("TweenService")
@@ -534,7 +533,6 @@ function Library:CreateWindow(cfg)
 		local btnRow = create("Frame", {
 			BackgroundTransparency = 1,
 			Size = UDim2.new(1, 0, 0, 32),
-			Position = UDim2.new(0, 0, 0, 0),
 			AutomaticSize = Enum.AutomaticSize.Y,
 			Parent = prompt,
 		}, {
@@ -2011,4 +2009,361 @@ function Library:CreateWindow(cfg)
 	return Window
 end
 
-return Library
+----------------------------------------------------------------
+-- FULL EXAMPLE
+----------------------------------------------------------------
+
+Library:SetFolder("VaehzDemo")
+
+local Window = Library:CreateWindow({
+	Title = "Vaehz Full Example",
+	Accent = Color3.fromRGB(100, 160, 255),
+	ToggleKey = Enum.KeyCode.RightShift,
+	Folder = "VaehzDemo",
+
+	Youtube = "https://youtube.com/@vaehz",
+	Discord = {
+		Link = "https://discord.gg/vaehz",
+		Code = "vaehz",
+	},
+})
+
+local Main = Window:CreateTab({ Name = "Main", Icon = "house" })
+
+Main:CreateSection("Welcome")
+Main:CreateLabel("This script shows every feature in the library.")
+Main:CreateSubLabel("Press RightShift to hide/show the UI.")
+Main:CreateParagraph({
+	Title = "About",
+	Content = "Vaehz is a clean dark UI library with expandable elements, search, keybinds, progress bars, dialogs, config system and more.",
+})
+Main:CreateWarning("None of these toggles actually change anything in-game. Pure demo.")
+
+Main:CreateDivider()
+Main:CreateSpace(4)
+
+local Status = Main:CreateStat({ Name = "Status", Value = "Idle" })
+
+Main:CreateButton({
+	Name = "Say Hello",
+	Callback = function()
+		print("Hello from Vaehz")
+		Status:Set("Said hello")
+		Library:Notify({ Title = "Button", Content = "Printed to console", Duration = 3 })
+	end,
+})
+
+Main:CreateButton({
+	Name = "Open Dialog",
+	Callback = function()
+		Window:Dialog({
+			Title = "Confirm Action",
+			Content = "Are you sure you want to continue with this action?",
+			Buttons = {
+				{
+					Name = "Confirm",
+					Callback = function()
+						Status:Set("Dialog confirmed")
+						Library:Notify({ Title = "Dialog", Content = "You pressed Confirm", Duration = 3 })
+					end,
+				},
+				{ Name = "Cancel", Callback = function() Status:Set("Dialog cancelled") end },
+			},
+		})
+	end,
+})
+
+local Godmode = Main:CreateToggle({
+	Name = "Godmode",
+	Default = false,
+	Flag = "Godmode",
+	Callback = function(state)
+		print("Godmode:", state)
+		Status:Set(state and "Godmode on" or "Godmode off")
+	end,
+})
+
+local Speed = Main:CreateSlider({
+	Name = "WalkSpeed",
+	Min = 16, Max = 120, Increment = 1, Default = 16,
+	Flag = "WalkSpeed",
+	Callback = function(value) print("Speed:", value) end,
+})
+
+local Jump = Main:CreateSlider({
+	Name = "JumpPower",
+	Min = 50, Max = 200, Increment = 5, Default = 50,
+	Flag = "JumpPower",
+	Callback = function(value) print("Jump:", value) end,
+})
+
+local LoadProgress = Main:CreateProgressBar({ Name = "Loading", Value = 35 })
+
+Main:CreateButton({
+	Name = "Simulate Progress",
+	Callback = function()
+		for i = 0, 100, 5 do
+			LoadProgress:Set(i)
+			task.wait(0.04)
+		end
+		Library:Notify({ Title = "Progress", Content = "Finished", Duration = 2 })
+	end,
+})
+
+local Settings = Window:CreateTab({ Name = "Settings", Icon = "gear" })
+
+Settings:CreateSection("Preferences")
+
+local Username = Settings:CreateTextbox({
+	Name = "Username",
+	Placeholder = "enter name...",
+	Flag = "Username",
+	Callback = function(text) print("Username:", text) end,
+})
+
+local ThemeColor = Settings:CreateColorPicker({
+	Name = "Accent Color",
+	Default = Color3.fromRGB(100, 160, 255),
+	Flag = "AccentColor",
+	Callback = function(color) print("Accent changed") end,
+})
+
+local TransparentColor = Settings:CreateColorPicker({
+	Name = "Transparent Color",
+	Default = Color3.fromRGB(255, 80, 80),
+	Alpha = 0.7,
+	Flag = "TransparentColor",
+	Callback = function(color, alpha) print("Color:", color, "Alpha:", alpha) end,
+})
+
+local Mode = Settings:CreateDropdown({
+	Name = "Mode",
+	Options = { "Normal", "Rage", "Legit", "Custom" },
+	Default = "Normal",
+	Flag = "Mode",
+	Callback = function(selected)
+		print("Mode:", selected)
+		Status:Set("Mode → " .. selected)
+	end,
+})
+
+local Weapons = Settings:CreateDropdown({
+	Name = "Weapons",
+	Multi = true,
+	Search = true,
+	Options = { "AK-47", "M4A1", "AWP", "Deagle", "Knife", "MP5", "SCAR", "P90", "USP", "Glock" },
+	Default = { "AK-47" },
+	Flag = "Weapons",
+	Callback = function(selected) print("Weapons:", table.concat(selected, ", ")) end,
+})
+
+local AimKey = Settings:CreateKeybind({
+	Name = "Aim Key",
+	Default = Enum.KeyCode.E,
+	Flag = "AimKey",
+	Callback = function(key) print("Aim key set to", key.Name) end,
+})
+
+Settings:CreateDivider()
+Settings:CreateSection("Config System")
+
+local ConfigName = Settings:CreateTextbox({
+	Name = "Config Name",
+	Placeholder = "myconfig",
+	Callback = function() end,
+})
+
+Settings:CreateButton({
+	Name = "Save Config",
+	Callback = function()
+		local name = ConfigName:Get()
+		if name == "" then
+			Library:Notify({ Title = "Config", Content = "Enter a name first", Duration = 3 })
+			return
+		end
+		local ok, err = Library:SaveConfig(name)
+		Library:Notify({
+			Title = "Config",
+			Content = ok and ("Saved " .. name) or tostring(err),
+			Duration = 3,
+		})
+	end,
+})
+
+Settings:CreateButton({
+	Name = "Load Config",
+	Callback = function()
+		local name = ConfigName:Get()
+		if name == "" then
+			Library:Notify({ Title = "Config", Content = "Enter a name first", Duration = 3 })
+			return
+		end
+		local ok, err = Library:LoadConfig(name)
+		Library:Notify({
+			Title = "Config",
+			Content = ok and ("Loaded " .. name) or tostring(err),
+			Duration = 3,
+		})
+	end,
+})
+
+Settings:CreateButton({
+	Name = "List Configs",
+	Callback = function()
+		local list = Library:GetConfigList()
+		local msg = #list == 0 and "No configs found" or table.concat(list, ", ")
+		Library:Notify({ Title = "Configs", Content = msg, Duration = 4 })
+	end,
+})
+
+Settings:CreateDivider()
+
+Settings:CreateButton({
+	Name = "Reset Everything",
+	Callback = function()
+		Godmode:Set(false)
+		Speed:Set(16)
+		Jump:Set(50)
+		Username:Set("")
+		ThemeColor:Set(Color3.fromRGB(100, 160, 255))
+		Mode:Set("Normal")
+		Weapons:Set({ "AK-47" })
+		Status:Set("Reset")
+		Library:Notify({ Title = "Settings", Content = "Everything has been reset", Duration = 3 })
+	end,
+})
+
+local Visuals = Window:CreateTab({ Name = "Visuals", Icon = "eye" })
+
+Visuals:CreateSection("ESP")
+
+Visuals:CreateToggle({ Name = "Box ESP", Default = true, Flag = "BoxESP", Callback = function(state) print("Box ESP:", state) end })
+Visuals:CreateToggle({ Name = "Name Tags", Default = false, Flag = "NameTags", Callback = function(state) print("Name Tags:", state) end })
+Visuals:CreateToggle({ Name = "Tracers", Default = false, Flag = "Tracers", Callback = function(state) print("Tracers:", state) end })
+
+Visuals:CreateColorPicker({
+	Name = "ESP Color",
+	Default = Color3.fromRGB(0, 255, 140),
+	Flag = "ESPColor",
+	Callback = function() print("ESP color changed") end,
+})
+
+Visuals:CreateSlider({
+	Name = "ESP Opacity",
+	Min = 0, Max = 100, Increment = 5, Default = 80,
+	Flag = "ESPOpacity",
+	Callback = function(v) print("Opacity:", v) end,
+})
+
+Visuals:CreateDropdown({
+	Name = "Box Style",
+	Options = { "2D", "3D", "Corner", "Filled" },
+	Default = "2D",
+	Flag = "BoxStyle",
+	Callback = function(s) print("Box style:", s) end,
+})
+
+Visuals:CreateSpace(6)
+Visuals:CreateSection("Preview")
+Visuals:CreateImage({ Image = "rbxassetid://6031075938", Height = 100 })
+
+local PlayersTab = Window:CreateTab({ Name = "Players", Icon = "users" })
+
+PlayersTab:CreateSection("Player List")
+PlayersTab:CreateLabel("Type to search. Click a name to select.")
+
+local Selected = PlayersTab:CreateStat({ Name = "Selected", Value = "None" })
+
+local PlayerSearch = PlayersTab:CreatePlayerSearch({
+	Name = "Player",
+	ExcludeSelf = true,
+	Callback = function(player)
+		Selected:Set(player.Name)
+		Library:Notify({
+			Title = "Player Selected",
+			Content = player.DisplayName .. " (@" .. player.Name .. ")",
+			Duration = 3,
+		})
+		print("Selected:", player.Name)
+	end,
+})
+
+PlayersTab:CreateButton({
+	Name = "Clear Selection",
+	Callback = function()
+		Selected:Set("None")
+		PlayerSearch:Set(nil)
+		Library:Notify({ Title = "Players", Content = "Selection cleared", Duration = 2 })
+	end,
+})
+
+PlayersTab:CreateButton({
+	Name = "Refresh List",
+	Callback = function()
+		PlayerSearch:Refresh()
+		Library:Notify({ Title = "Players", Content = "List refreshed", Duration = 2 })
+	end,
+})
+
+local Misc = Window:CreateTab({ Name = "Misc", Icon = "dots-three" })
+
+Misc:CreateSection("Extra")
+Misc:CreateWarning("Some of these are just placeholders.")
+
+Misc:CreateButton({
+	Name = "Show Notification",
+	Callback = function()
+		Library:Notify({
+			Title = "Test Notify",
+			Content = "Full notification example with longer text so you can see wrapping.",
+			Duration = 5,
+		})
+	end,
+})
+
+Misc:CreateStat({ Name = "Players Online", Value = #Players:GetPlayers() })
+Misc:CreateStat({ Name = "Ping", Value = "—" })
+
+Misc:CreateToggle({
+	Name = "Auto Farm",
+	Default = false,
+	Flag = "AutoFarm",
+	Callback = function(state) print("Auto Farm:", state) end,
+})
+
+Misc:CreateTextbox({
+	Name = "Webhook",
+	Placeholder = "https://discord.com/api/webhooks/...",
+	MaxWidth = 200,
+	Flag = "Webhook",
+	Callback = function(text) print("Webhook:", text) end,
+})
+
+Misc:CreateDropdown({
+	Name = "Server Hop",
+	Options = { "Smallest", "Lowest Ping", "Random" },
+	Default = "Random",
+	Flag = "ServerHop",
+	Callback = function(selected) print("Server hop:", selected) end,
+})
+
+Misc:CreateDivider()
+Misc:CreateSection("Code & Image")
+
+Misc:CreateCode({
+	Title = "Example Snippet",
+	Code = [[print("Hello from Vaehz")
+local speed = 50
+print("Speed is", speed)]],
+})
+
+Misc:CreateImage({ Image = "rbxassetid://6031075938", Height = 90 })
+
+Misc:CreateSpace(8)
+Misc:CreateLabel("End of example. Every feature is shown across the tabs.")
+
+Library:Notify({
+	Title = "Loaded",
+	Content = "Full example ready. Every feature is shown across the tabs.",
+	Duration = 4,
+})
